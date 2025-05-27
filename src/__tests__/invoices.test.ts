@@ -2,18 +2,19 @@ import request from 'supertest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import app from '../app';
-import User from '../models/User';
-import Customer from '../models/Customer';
+import User, { UserDocument } from '../models/User';
+import Customer, { CustomerDocument } from '../models/Customer';
 import Invoice from '../models/Invoice';
-import sequelize from '../config/database';
+import { connectDB } from '../config/database';
+import mongoose from 'mongoose';
 
 describe('Invoice Controller', () => {
   let authToken: string;
-  let testUser: User;
-  let testCustomer: Customer;
+  let testUser: UserDocument;
+  let testCustomer: CustomerDocument;
 
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    await connectDB();
     
     // Create test user
     const password = await bcrypt.hash('testpassword', 10);
@@ -47,11 +48,11 @@ describe('Invoice Controller', () => {
   });
 
   afterAll(async () => {
-    await sequelize.close();
+    await mongoose.connection.close();
   });
 
   beforeEach(async () => {
-    await Invoice.destroy({ where: {} });
+    await Invoice.deleteMany({});
   });
 
   describe('GET /api/invoices', () => {
@@ -247,7 +248,7 @@ describe('Invoice Controller', () => {
 
       expect(response.status).toBe(204);
 
-      const deletedInvoice = await Invoice.findByPk(invoice.id);
+      const deletedInvoice = await Invoice.findById(invoice.id);
       expect(deletedInvoice).toBeNull();
     });
   });

@@ -3,19 +3,20 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import app from '../app';
 import User from '../models/User';
-import sequelize from '../config/database';
+import { connectDB } from '../config/database';
+import mongoose from 'mongoose';
 
 describe('Auth Controller', () => {
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    await connectDB();
   });
 
   afterAll(async () => {
-    await sequelize.close();
+    await mongoose.connection.close();
   });
 
   beforeEach(async () => {
-    await User.destroy({ where: {} });
+    await User.deleteMany({});
   });
 
   describe('POST /api/auth/login', () => {

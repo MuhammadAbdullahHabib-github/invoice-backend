@@ -2,16 +2,17 @@ import request from 'supertest';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import app from '../app';
-import User from '../models/User';
+import User, { UserDocument } from '../models/User';
 import Customer from '../models/Customer';
-import sequelize from '../config/database';
+import { connectDB } from '../config/database';
+import mongoose from 'mongoose';
 
 describe('Customer Controller', () => {
   let authToken: string;
-  let testUser: User;
+  let testUser: UserDocument;
 
   beforeAll(async () => {
-    await sequelize.sync({ force: true });
+    await connectDB();
     
     // Create test user
     const password = await bcrypt.hash('testpassword', 10);
@@ -30,11 +31,11 @@ describe('Customer Controller', () => {
   });
 
   afterAll(async () => {
-    await sequelize.close();
+    await mongoose.connection.close();
   });
 
   beforeEach(async () => {
-    await Customer.destroy({ where: {} });
+    await Customer.deleteMany({});
   });
 
   describe('GET /api/customers', () => {
@@ -56,7 +57,7 @@ describe('Customer Controller', () => {
       await Customer.create({
         name: 'Test Customer',
         email: 'customer@example.com',
-        phone: '1234567890',
+        contact: '1234567890',
         address: {
           street: '123 Test St',
           city: 'Test City',
@@ -98,7 +99,7 @@ describe('Customer Controller', () => {
       const customerData = {
         name: 'New Customer',
         email: 'new@example.com',
-        phone: '9876543210',
+        contact: '9876543210',
         address: {
           street: '456 New St',
           city: 'New City',
@@ -115,7 +116,7 @@ describe('Customer Controller', () => {
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('name', customerData.name);
-      expect(response.body).toHaveProperty('phone', customerData.phone);
+      expect(response.body).toHaveProperty('contact', customerData.contact);
       expect(response.body).toHaveProperty('address');
       expect(response.body.address).toEqual(customerData.address);
     });
@@ -205,7 +206,7 @@ describe('Customer Controller', () => {
       const customer = await Customer.create({
         name: 'Test Customer',
         email: 'customer@example.com',
-        phone: '1234567890',
+        contact: '1234567890',
         address: {
           street: '123 Test St',
           city: 'Test City',
@@ -244,7 +245,7 @@ describe('Customer Controller', () => {
       const customer = await Customer.create({
         name: 'Test Customer',
         email: 'customer@example.com',
-        phone: '1234567890',
+        contact: '1234567890',
         address: {
           street: '123 Test St',
           city: 'Test City',
@@ -269,7 +270,7 @@ describe('Customer Controller', () => {
       expect(response.body).toHaveProperty('name', updateData.name);
       expect(response.body).toHaveProperty('email', updateData.email);
       // Original data should be preserved
-      expect(response.body).toHaveProperty('phone', customer.phone);
+      expect(response.body).toHaveProperty('contact', customer.contact);
       expect(response.body).toHaveProperty('address');
     });
 
@@ -315,7 +316,7 @@ describe('Customer Controller', () => {
       const customer = await Customer.create({
         name: 'Test Customer',
         email: 'customer@example.com',
-        phone: '1234567890',
+        contact: '1234567890',
         address: {
           street: '123 Test St',
           city: 'Test City',
@@ -333,7 +334,7 @@ describe('Customer Controller', () => {
       expect(response.status).toBe(204);
 
       // Verify customer was deleted
-      const deletedCustomer = await Customer.findByPk(customer.id);
+      const deletedCustomer = await Customer.findById(customer.id);
       expect(deletedCustomer).toBeNull();
     });
   });
