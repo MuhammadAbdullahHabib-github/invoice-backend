@@ -29,6 +29,7 @@ app.use(helmet());
 app.use(cors({
   origin: [
     'https://carlinegarage.netlify.app',
+    'https://api.paperandhomes.com',
     // Add other allowed origins here if needed
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
