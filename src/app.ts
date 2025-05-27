@@ -27,10 +27,9 @@ const app = express();
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: [
-    'https://carlinegarage.netlify.app',
+  origin: '*',
+    // 'https://carlinegarage.netlify.app',
     // Add other allowed origins here if needed
-  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: '*',
   credentials: true
@@ -63,6 +62,11 @@ app.use(`${BASE}/admin`, adminRoutes);
 app.use(`${BASE}/products`, productRoutes);
 app.use(`${BASE}/pdf-template-settings`, pdfTemplateSettingsRoutes);
 
+// Simple test route
+app.get('/hello', (req, res) => {
+  res.json({ message: 'Hello, I am working!' });
+});
+
 // Error handling
 app.use(errorLogger);
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -80,9 +84,9 @@ const startServer = async (): Promise<void> => {
     console.log(`Base URL: ${process.env.BASE_URL || '/api'}`);
     
     await connectDB();
-    const server = app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-      logger.info(`Server running on ${process.env.BASE_URL || `http://localhost:${PORT}/api`}`);
+    const server = app.listen(Number(PORT) , '0.0.0.0' ,() => {
+      console.log(`Server is running on http://0.0.0.0:${PORT}`);
+      logger.info(`Server running on ${process.env.BASE_URL || `http://0.0.0.0:${PORT}/api`}`);
     });
 
     server.on('error', (error: any) => {
