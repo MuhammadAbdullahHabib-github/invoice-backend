@@ -27,9 +27,10 @@ const app = express();
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: '*',
-    // 'https://carlinegarage.netlify.app',
+  origin: [
+    'https://carlinegarage.netlify.app',
     // Add other allowed origins here if needed
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: '*',
   credentials: true
